@@ -301,7 +301,7 @@ docker run -d \
 docker run -d \
   --name kiro-rs \
   --restart unless-stopped \
-  -p 8990:8990 \
+  -p 127.0.0.1:8990:8990 \
   -v "$(pwd)/config:/app/config" \
   --add-host=host.docker.internal:host-gateway \
   ghcr.io/hank9999/kiro-rs:v2026.3.1
@@ -314,3 +314,11 @@ docker run -d \
 - `config/` 目录不会丢
 - 之前通过 Admin 导入的凭据仍会保留
 
+可用模型：
+
+```bash
+- claude-sonnet-4-5-20250929
+- claude-sonnet-4-5-20250929-thinking
+- claude-haiku-4-5-20251001
+- claude-haiku-4-5-20251001-thinking
+```

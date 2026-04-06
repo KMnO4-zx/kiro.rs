@@ -295,6 +295,18 @@ docker run -d \
   kiro-rs
 ```
 
+使用作者提供的远程镜像也可以，例如：
+
+```shell
+docker run -d \
+  --name kiro-rs \
+  --restart unless-stopped \
+  -p 8990:8990 \
+  -v "$(pwd)/config:/app/config" \
+  --add-host=host.docker.internal:host-gateway \
+  ghcr.io/hank9999/kiro-rs:v2026.3.1
+```
+
 这套流程里：
 
 - 镜像会更新
@@ -302,73 +314,3 @@ docker run -d \
 - `config/` 目录不会丢
 - 之前通过 Admin 导入的凭据仍会保留
 
-## 12. 常见问题
-
-### 1. 为什么访问不到服务
-
-先检查：
-
-- `config.json` 里的 `host` 是否是 `0.0.0.0`
-- 容器是否正常运行
-- VPS 防火墙或安全组是否放行 `8990`
-
-检查命令：
-
-```bash
-docker ps
-docker logs --tail 200 kiro-rs
-```
-
-### 2. 为什么容器启动了，但请求失败
-
-通常是以下原因之一：
-
-- 还没有导入凭据
-- `refreshToken` 无效或过期
-- 区域配置不正确
-- 网络或代理有问题
-
-### 3. 需要先准备 credentials.json 吗
-
-不需要，但没有凭据时只能先把服务跑起来，不能正常转发模型请求。
-
-### 4. 通过 Admin 导入的凭据会保存到哪里
-
-保存到你挂载的宿主机目录，也就是：
-
-```text
-./config/credentials.json
-```
-
-因此：
-
-- 重启容器不会丢
-- 重建容器不会丢
-- 只要 `config/` 目录还在，就能继承
-
-### 5. 可不可以不用本地构建，直接跑远程镜像
-
-可以，例如：
-
-```bash
-docker run -d \
-  --name kiro-rs \
-  --restart unless-stopped \
-  -p 8990:8990 \
-  -v "$(pwd)/config:/app/config" \
-  --add-host=host.docker.internal:host-gateway \
-  ghcr.io/hank9999/kiro-rs:latest
-```
-
-但如果你本地改过代码，就应该重新 `docker build` 自己的镜像。
-
-## 13. 建议
-
-生产环境至少建议做到：
-
-- 使用强随机字符串作为 `apiKey` 和 `adminApiKey`
-- 不要把 `credentials.json` 提交到 Git
-- 给 VPS 开启基本防火墙规则
-- 最好使用 Nginx 或 Caddy 反向代理并提供 HTTPS
-
-如果只是先在 VPS 上跑通功能，以上反代可以后面再补。
